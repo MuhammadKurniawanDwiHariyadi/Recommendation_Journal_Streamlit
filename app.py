@@ -4,10 +4,6 @@ import numpy as np
 import h5py
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import cos_sim
-import nltk
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
 import re
 import time
 from PIL import Image
@@ -21,8 +17,16 @@ st.set_page_config(
 )
 
 # Download NLTK data
-nltk.download('stopwords')
-nltk.download('punkt')
+import nltk
+try:
+    nltk.data.find('tokenizers/punkt')
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    import os
+    os.makedirs('/home/appuser/nltk_data', exist_ok=True)
+    nltk.download('punkt', download_dir='/home/appuser/nltk_data')
+    nltk.download('stopwords', download_dir='/home/appuser/nltk_data')
+    nltk.data.path.append('/home/appuser/nltk_data')
 
 # Preprocessing text
 def preprocess_text(text):

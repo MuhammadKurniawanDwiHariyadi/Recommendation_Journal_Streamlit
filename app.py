@@ -26,12 +26,14 @@ def download_nltk_data():
     try:
         nltk.download('punkt', download_dir=nltk_data_path, quiet=True)
         nltk.download('stopwords', download_dir=nltk_data_path, quiet=True)
+        nltk.download('punkt_tab', download_dir=nltk_data_path, quiet=True)
         # Verify downloads
         nltk.data.find('tokenizers/punkt')
         nltk.data.find('corpora/stopwords')
     except LookupError:
         nltk.download('punkt', download_dir=nltk_data_path)
         nltk.download('stopwords', download_dir=nltk_data_path)
+        nltk.download('punkt_tab', download_dir=nltk_data_path)
         nltk.data.path.append(nltk_data_path)
     except Exception as e:
         import traceback

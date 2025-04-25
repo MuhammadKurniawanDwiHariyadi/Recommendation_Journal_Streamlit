@@ -28,6 +28,10 @@ except LookupError:
     nltk.download('stopwords', download_dir='/home/appuser/nltk_data')
     nltk.data.path.append('/home/appuser/nltk_data')
 
+import os
+# Set NLTK data path
+os.environ['NLTK_DATA'] = '/home/appuser/nltk_data'
+
 # Preprocessing text
 def preprocess_text(text):
     text = re.sub(r'[^a-zA-Z\s]', '', text)

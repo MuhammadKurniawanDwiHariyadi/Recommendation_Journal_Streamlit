@@ -14,21 +14,25 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 import os
 
-# Initialize NLTK data
+# Initialize NLTK data path
 nltk_data_path = os.path.join(os.getcwd(), 'nltk_data')
 os.makedirs(nltk_data_path, exist_ok=True)
 nltk.data.path.append(nltk_data_path)
 
-# Download NLTK data if not exists
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt', download_dir=nltk_data_path)
-    
-try:
-    nltk.data.find('corpora/stopwords')
-except LookupError:
-    nltk.download('stopwords', download_dir=nltk_data_path)
+# Download required NLTK data
+required_nltk_data = ['punkt', 'stopwords', 'punkt_tab']
+
+for resource in required_nltk_data:
+    try:
+        nltk.data.find(f'tokenizers/{resource}')
+    except LookupError:
+        try:
+            nltk.download(resource, download_dir=nltk_data_path)
+            # Verify download was successful
+            nltk.data.find(f'tokenizers/{resource}')
+        except Exception as e:
+            st.error(f"Failed to download NLTK resource {resource}: {str(e)}")
+            st.stop()
 
 # Set page config
 st.set_page_config(

@@ -16,21 +16,24 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Download NLTK data
 import nltk
+import os
+
+# Set NLTK data path
+nltk_data_path = os.path.join(os.getcwd(), 'nltk_data')
+os.makedirs(nltk_data_path, exist_ok=True)
+nltk.data.path.append(nltk_data_path)
+
+# Download NLTK data if not exists
 try:
     nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt', download_dir=nltk_data_path)
+    
+try:
     nltk.data.find('corpora/stopwords')
 except LookupError:
-    import os
-    os.makedirs('/home/appuser/nltk_data', exist_ok=True)
-    nltk.download('punkt', download_dir='/home/appuser/nltk_data')
-    nltk.download('stopwords', download_dir='/home/appuser/nltk_data')
-    nltk.data.path.append('/home/appuser/nltk_data')
-
-import os
-# Set NLTK data path
-os.environ['NLTK_DATA'] = '/home/appuser/nltk_data'
+    nltk.download('stopwords', download_dir=nltk_data_path)
 
 # Preprocessing text
 def preprocess_text(text):

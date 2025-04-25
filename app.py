@@ -4,9 +4,14 @@ import numpy as np
 import h5py
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import cos_sim
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
 import re
 import time
 from PIL import Image
+import os
 
 import nltk
 import os
@@ -24,6 +29,10 @@ def download_nltk_data():
         # Verify downloads
         nltk.data.find('tokenizers/punkt')
         nltk.data.find('corpora/stopwords')
+    except LookupError:
+        nltk.download('punkt', download_dir=nltk_data_path)
+        nltk.download('stopwords', download_dir=nltk_data_path)
+        nltk.data.path.append(nltk_data_path)
     except Exception as e:
         import traceback
         st.error(f"NLTK data download failed: {str(e)}")

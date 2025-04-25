@@ -9,30 +9,29 @@ import time
 from PIL import Image
 
 import nltk
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
 import os
 
-# Initialize NLTK data path
+# Set NLTK data path
 nltk_data_path = os.path.join(os.getcwd(), 'nltk_data')
 os.makedirs(nltk_data_path, exist_ok=True)
 nltk.data.path.append(nltk_data_path)
 
 # Download required NLTK data
-required_nltk_data = ['punkt', 'stopwords', 'punkt_tab']
-
-for resource in required_nltk_data:
+def download_nltk_data():
     try:
-        nltk.data.find(f'tokenizers/{resource}')
-    except LookupError:
-        try:
-            nltk.download(resource, download_dir=nltk_data_path)
-            # Verify download was successful
-            nltk.data.find(f'tokenizers/{resource}')
-        except Exception as e:
-            st.error(f"Failed to download NLTK resource {resource}: {str(e)}")
-            st.stop()
+        nltk.download('punkt', download_dir=nltk_data_path, quiet=True)
+        nltk.download('stopwords', download_dir=nltk_data_path, quiet=True)
+        # Verify downloads
+        nltk.data.find('tokenizers/punkt')
+        nltk.data.find('corpora/stopwords')
+    except Exception as e:
+        import traceback
+        st.error(f"NLTK data download failed: {str(e)}")
+        st.text(traceback.format_exc())
+        st.stop()
+
+# Call this function at app startup
+download_nltk_data()
 
 # Set page config
 st.set_page_config(

@@ -8,18 +8,13 @@ import re
 import time
 from PIL import Image
 
-# Set page config
-st.set_page_config(
-    page_title="Journal Recommendation System",
-    page_icon="📚",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
 import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
 import os
 
-# Set NLTK data path
+# Initialize NLTK data
 nltk_data_path = os.path.join(os.getcwd(), 'nltk_data')
 os.makedirs(nltk_data_path, exist_ok=True)
 nltk.data.path.append(nltk_data_path)
@@ -35,12 +30,21 @@ try:
 except LookupError:
     nltk.download('stopwords', download_dir=nltk_data_path)
 
+# Set page config
+st.set_page_config(
+    page_title="Journal Recommendation System",
+    page_icon="📚",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 # Preprocessing text
 def preprocess_text(text):
     text = re.sub(r'[^a-zA-Z\s]', '', text)
     text = text.lower()
     tokens = word_tokenize(text)
-    tokens = [word for word in tokens if word not in stopwords.words('english')]
+    stop_words = set(stopwords.words('english'))
+    tokens = [word for word in tokens if word not in stop_words]
     stemmer = PorterStemmer()
     tokens = [stemmer.stem(word) for word in tokens]
     return ' '.join(tokens)

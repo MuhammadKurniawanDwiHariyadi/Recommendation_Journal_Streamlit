@@ -151,7 +151,7 @@ with st.sidebar:
         value=15,
         help="Select how many journal recommendations you want to see"
     )
-    
+    st.write(" ")
     # Minimum similarity score filter
     min_score = st.slider(
         "Minimum Similarity Score (%)",
@@ -160,7 +160,7 @@ with st.sidebar:
         value=30,
         help="Filter out journals with similarity score below this threshold"
     )
-    
+    st.write(" ")
     # Sorting options
     sort_by = st.selectbox(
         "Sort By:",
@@ -175,14 +175,102 @@ with st.sidebar:
         index=0,
         help="Select how to sort the recommendations"
     )[1]
+
+    st.divider()
     
     # Additional filters
     st.subheader("Additional Filters")
-    publisher_filter = st.text_input(
-        "Filter by Publisher (leave empty for all)",
-        "",
-        help="Only show journals from specific publisher"
-    )
+    
+    # Publisher filter with spacing
+    publisher_container = st.container(border=True)
+    with publisher_container:
+        st.text("Journal Publisher", help="Only show journals from specific publisher")
+        publisher_filter = st.text_input(
+            "Filter by publisher name",
+            "",
+            label_visibility="collapsed"
+        )
+
+    # Spacing between filters
+    st.write("")  # Adds vertical space
+
+    # APC Range Filter with improved layout
+    apc_container = st.container(border=True)
+    with apc_container:
+        st.text("APC Budget Range (USD)")
+        
+        # Initialize session state for APC values
+        if 'apc_min' not in st.session_state:
+            st.session_state.apc_min = 0
+        if 'apc_max' not in st.session_state:
+            st.session_state.apc_max = 7000
+
+        # Dual-point range slider
+        apc_range = st.slider(
+            "Select price range",
+            min_value=0,
+            max_value=15000,
+            value=(st.session_state.apc_min, st.session_state.apc_max),
+            step=100,
+            help="Drag handles to adjust budget range",
+            label_visibility="collapsed"
+        )
+
+        # Number inputs in columns
+        col1, col2 = st.columns(2)
+        with col1:
+            new_min = st.number_input(
+                "Minimum",
+                min_value=0,
+                max_value=st.session_state.apc_max,
+                value=st.session_state.apc_min,
+                step=100,
+                help="Minimum APC value",
+                key="apc_min_input"
+            )
+            
+        with col2:
+            new_max = st.number_input(
+                "Maximum",
+                min_value=st.session_state.apc_min,
+                max_value=15000,
+                value=st.session_state.apc_max,
+                step=100,
+                help="Maximum APC value",
+                key="apc_max_input"
+            )
+
+        # Synchronization logic
+        if apc_range != (st.session_state.apc_min, st.session_state.apc_max):
+            st.session_state.apc_min, st.session_state.apc_max = apc_range
+            st.rerun()
+
+        if new_min != st.session_state.apc_min or new_max != st.session_state.apc_max:
+            st.session_state.apc_min = new_min
+            st.session_state.apc_max = new_max
+            st.rerun()
+
+        apc_min = st.session_state.apc_min
+        apc_max = st.session_state.apc_max
+
+    # Spacing between filters
+    st.write("")  # Adds vertical space
+
+    # Quantile filter with improved layout
+    quantile_container = st.container(border=True)
+    with quantile_container:
+        st.text("Journal Quantiles", help="Select journal quantiles to include")
+        
+        # Create 4 columns for checkboxes
+        qcol1, qcol2, qcol3, qcol4 = st.columns(4)
+        with qcol1:
+            q1 = st.checkbox("Q1", value=True)
+        with qcol2:
+            q2 = st.checkbox("Q2", value=True)
+        with qcol3:
+            q3 = st.checkbox("Q3", value=True)
+        with qcol4:
+            q4 = st.checkbox("Q4", value=True)
     
     # About section
     st.markdown("---")
@@ -319,9 +407,46 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
             )
             
             # Apply publisher filter if specified
-            if publisher_filter:
-                recommendations = [r for r in recommendations 
-                                if publisher_filter.lower() in r.get('publisher', '').lower()]
+            # Apply publisher filter if specified
+            if (publisher_filter or 
+                apc_min > 0 or 
+                apc_max < 10000 or 
+                not (q1 and q2 and q3 and q4 )):
+                
+                filtered_recommendations = []
+                for r in recommendations:
+                    # 1. Publisher filter
+                    pub_match = True  # Default to match if no filter
+                    if publisher_filter:
+                        publisher = str(r.get('publisher', '')).lower()
+                        pub_match = publisher_filter.lower() in publisher
+                    
+                    # 2. APC filter with better parsing
+                    apc_match = True  # Default to match if no filter
+                    if apc_min > 0 or apc_max < 10000:
+                        apc_str = str(r.get('apc', '0'))
+                        try:
+                            # Handle various APC formats: "$1,000", "1000 USD", "500", etc.
+                            apc_val = float(''.join(c for c in apc_str if c.isdigit() or c == '.'))
+                            apc_match = apc_min <= apc_val <= apc_max
+                        except (ValueError, TypeError):
+                            apc_match = False  # Exclude if APC can't be parsed
+                    
+                    # 3. Quantile filter with more robust matching
+                    quantile_match = True  # Default to match if all quantiles selected
+                    if not (q1 and q2 and q3 and q4):
+                        quantile = str(r.get('indexScopus', '')).upper()
+                        quantile_match = (
+                            (q1 and 'Q1' in quantile) or
+                            (q2 and 'Q2' in quantile) or
+                            (q3 and 'Q3' in quantile) or
+                            (q4 and 'Q4' in quantile)
+                        )
+                    
+                    if pub_match and apc_match and quantile_match:
+                        filtered_recommendations.append(r)
+                
+                recommendations = filtered_recommendations
             
             if not recommendations:
                 st.warning("No journals match your criteria. Try adjusting your filters.")

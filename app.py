@@ -285,7 +285,8 @@ with st.sidebar:
     """)
 
 # Main content
-st.title("📚 Journal Recommendation System")
+st.title("📚 Journal Recommendation System - TRUNO APP Experimental")
+st.warning("This streamlit is experimental for TRUNO APP Journal Recommendations users. It is possible that the data used is still old data and the data is not updated.")
 st.markdown("Find the perfect journal for your research paper based on your abstract.")
 
 # Input section with tabs

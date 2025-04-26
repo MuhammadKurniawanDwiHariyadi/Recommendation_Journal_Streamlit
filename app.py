@@ -141,7 +141,7 @@ def get_recommendations(abstrak, embeddings, journal_data, sort_by, top_n=5, min
 # Sidebar with additional options
 with st.sidebar:
     st.title("⚙️ Settings")
-    st.subheader("Recommendation Parameters")
+    st.subheader("Recommendation Parameters", help="Customize the parameters to fine-tune the results of your recommendations, after recommendations are defined")
     
     # Number of recommendations slider
     top_n = st.slider(
@@ -179,7 +179,7 @@ with st.sidebar:
     st.divider()
     
     # Additional filters
-    st.subheader("Additional Filters")
+    st.subheader("Additional Filters", help = "Narrow down your recommendations based on specific criteria, before recommendations are defined")
     
     # Publisher filter with spacing
     publisher_container = st.container(border=True)
@@ -286,7 +286,7 @@ with st.sidebar:
 
 # Main content
 st.title("📚 Journal Recommendation System - TRUNO APP Experimental")
-st.warning("This streamlit is experimental for TRUNO APP Journal Recommendations users. It is possible that the data used is still old data and the data is not updated.")
+st.warning("This streamlit is experimental for TRUNO APP Journal Recommendations users. It is possible that the data used is still old data and the data is not updated. Go to this url: http://truno-app.my.id:8081/ for updated data with search history feature")
 st.markdown("Find the perfect journal for your research paper based on your abstract.")
 
 # Input section with tabs

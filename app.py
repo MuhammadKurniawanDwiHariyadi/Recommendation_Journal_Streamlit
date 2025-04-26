@@ -46,8 +46,8 @@ download_nltk_data()
 
 # Set page config
 st.set_page_config(
-    page_title="Journal Recommendation System",
-    page_icon="📚",
+    page_title="Truno App Experimental- Journal Recommendation System",
+    page_icon="truno-app2.png",
     layout="wide",
     initial_sidebar_state="expanded"
 )

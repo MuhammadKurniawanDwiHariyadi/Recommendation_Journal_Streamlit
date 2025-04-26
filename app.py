@@ -434,7 +434,7 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
             
             if not filtered_journal_data:
                 st.warning("No journals match your filter criteria. Try adjusting your filters.")
-                return
+                st.stop()
             
             # Convert filtered embeddings to numpy array
             filtered_embeddings = np.array(filtered_embeddings)

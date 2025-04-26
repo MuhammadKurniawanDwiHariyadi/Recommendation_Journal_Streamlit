@@ -396,65 +396,66 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
                 time.sleep(0.01)
                 progress_bar.progress(percent_complete + 1)
             
-            embeddings, journal_data = load_data()
+            # Load all data first
+            embeddings, all_journal_data = load_data()
+            
+            # Apply filters to the database BEFORE recommendations
+            filtered_journal_data = []
+            filtered_embeddings = []
+            
+            for i, journal in enumerate(all_journal_data):
+                # 1. Publisher filter
+                pub_match = not publisher_filter or publisher_filter.lower() in str(journal.get('publisher', '')).lower()
+                
+                # 2. APC filter
+                apc_match = True
+                if apc_min > 0 or apc_max < 15000:
+                    apc_str = str(journal.get('apc', '0'))
+                    try:
+                        apc_val = float(''.join(c for c in apc_str if c.isdigit() or c == '.'))
+                        apc_match = apc_min <= apc_val <= apc_max
+                    except (ValueError, TypeError):
+                        apc_match = False
+                
+                # 3. Quantile filter
+                quantile_match = True
+                if not (q1 and q2 and q3 and q4):
+                    quantile = str(journal.get('indexScopus', '')).upper()
+                    quantile_match = (
+                        (q1 and 'Q1' in quantile) or
+                        (q2 and 'Q2' in quantile) or
+                        (q3 and 'Q3' in quantile) or
+                        (q4 and 'Q4' in quantile)
+                    )
+                
+                if pub_match and apc_match and quantile_match:
+                    filtered_journal_data.append(journal)
+                    filtered_embeddings.append(embeddings[i])
+            
+            if not filtered_journal_data:
+                st.warning("No journals match your filter criteria. Try adjusting your filters.")
+                return
+            
+            # Convert filtered embeddings to numpy array
+            filtered_embeddings = np.array(filtered_embeddings)
+            
+            # Generate recommendations from filtered data
             recommendations = get_recommendations(
                 input_abstract, 
-                embeddings, 
-                journal_data, 
+                filtered_embeddings, 
+                filtered_journal_data, 
                 sort_by, 
                 top_n,
                 min_score
             )
             
-            # Apply publisher filter if specified
-            # Apply publisher filter if specified
-            if (publisher_filter or 
-                apc_min > 0 or 
-                apc_max < 10000 or 
-                not (q1 and q2 and q3 and q4 )):
-                
-                filtered_recommendations = []
-                for r in recommendations:
-                    # 1. Publisher filter
-                    pub_match = True  # Default to match if no filter
-                    if publisher_filter:
-                        publisher = str(r.get('publisher', '')).lower()
-                        pub_match = publisher_filter.lower() in publisher
-                    
-                    # 2. APC filter with better parsing
-                    apc_match = True  # Default to match if no filter
-                    if apc_min > 0 or apc_max < 10000:
-                        apc_str = str(r.get('apc', '0'))
-                        try:
-                            # Handle various APC formats: "$1,000", "1000 USD", "500", etc.
-                            apc_val = float(''.join(c for c in apc_str if c.isdigit() or c == '.'))
-                            apc_match = apc_min <= apc_val <= apc_max
-                        except (ValueError, TypeError):
-                            apc_match = False  # Exclude if APC can't be parsed
-                    
-                    # 3. Quantile filter with more robust matching
-                    quantile_match = True  # Default to match if all quantiles selected
-                    if not (q1 and q2 and q3 and q4):
-                        quantile = str(r.get('indexScopus', '')).upper()
-                        quantile_match = (
-                            (q1 and 'Q1' in quantile) or
-                            (q2 and 'Q2' in quantile) or
-                            (q3 and 'Q3' in quantile) or
-                            (q4 and 'Q4' in quantile)
-                        )
-                    
-                    if pub_match and apc_match and quantile_match:
-                        filtered_recommendations.append(r)
-                
-                recommendations = filtered_recommendations
-            
             if not recommendations:
-                st.warning("No journals match your criteria. Try adjusting your filters.")
+                st.warning("No recommendations found after applying all filters.")
             else:
                 # Display results
                 st.success(f"Found {len(recommendations)} journal recommendations!")
                 
-                # Metrics row - FIXED VERSION
+                # Metrics row
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     avg_score = np.mean([r['score'] for r in recommendations])
@@ -463,13 +464,11 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
                     q1_journals = len([r for r in recommendations if 'Q1' in r.get('indexScopus', '')])
                     st.metric("Q1 Journals", q1_journals)
                 with col3:
-                    # Fixed impact factor calculation to handle comma decimals
                     impact_factors = []
                     for r in recommendations:
                         if_val = r.get('impactFactor', '-')
                         if if_val not in ['-', 'N/A']:
                             try:
-                                # Replace comma with dot and convert to float
                                 num = float(if_val.replace(',', '.'))
                                 impact_factors.append(num)
                             except ValueError:
@@ -537,7 +536,7 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
                 
                 # Journal details expanders
                 st.subheader("🔍 Journal Details")
-                for i, journal in enumerate(recommendations[:top_n]):  # Show details for top 5
+                for i, journal in enumerate(recommendations[:top_n]):
                     with st.expander(f"{i+1}. {journal.get('sourceTitle', 'Unknown')}"):
                         col1, col2 = st.columns([1, 3])
                         with col1:
@@ -556,7 +555,7 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
     else:
         st.warning("Please enter an abstract or upload a document first")
 
-# Add some footer information
+# Footer information
 st.markdown("---")
 st.markdown("""
 ### About This System

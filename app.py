@@ -504,7 +504,7 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
                 # Select which columns to show
                 default_columns = [
                     "sourceTitle", "publisher", "indexScopus", 
-                    "citeScore", "impactFactor", "score"
+                    "citeScore", "impactFactor", "apc","score"
                 ]
                 
                 # Let users select which columns they want to see

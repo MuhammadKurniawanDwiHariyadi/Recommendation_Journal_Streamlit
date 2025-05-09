@@ -286,7 +286,7 @@ with st.sidebar:
 
 # Main content
 st.title("📚 Journal Recommendation System - TRUNO APP Experimental")
-st.warning("This streamlit is experimental for TRUNO APP Journal Recommendations users. It is possible that the data used is still old data and the data is not updated. Go to this url: http://truno-app.my.id:8081/ for updated data with search history feature")
+st.warning("This streamlit is experimental for TRUNO App Journal Recommendation users. It is possible that the data used is still old data and has not been updated, even the recommended results can be different if the settings are set. Visit the following url: http://truno-app.my.id:8081/ for the latest data with search history feature")
 st.markdown("Find the perfect journal for your research paper based on your abstract.")
 
 # Input section with tabs

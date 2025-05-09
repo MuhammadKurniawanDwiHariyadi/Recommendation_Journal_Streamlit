@@ -487,7 +487,7 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
                 # Enhanced dataframe display
                 df_recommendations = pd.DataFrame(recommendations)
 
-                df_recommendations['apc'] = display_df['apc'].apply(
+                df_recommendations['apc'] = df_recommendations['apc'].apply(
                     lambda x: f"${x}" if str(x) not in ['-', 'N/A', 'nan', ''] and str(x).replace('.','',1).isdigit() else x
                 )
                 

@@ -494,7 +494,7 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
                     "indexScopus": st.column_config.TextColumn("Scopus Index"),
                     "citeScore": st.column_config.NumberColumn("Cite Score", format="%.1f"),
                     "publisher": st.column_config.TextColumn("Publisher"),
-                    "apc": st.column_config.TextColumn("APC"),
+                    "apc": st.column_config.TextColumn("APC (USD)", format="$%s")
                     "impactFactor": st.column_config.TextColumn("Impact Factor"),
                     "score": st.column_config.ProgressColumn(
                         "Similarity Score",
@@ -548,7 +548,8 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
                             st.metric("Similarity Score", f"{journal['score']:.1f}%")
                             st.metric("Cite Score", journal.get('citeScore', 'N/A'))
                             st.metric("Impact Factor", journal.get('impactFactor', 'N/A'))
-                            st.metric("APC", journal.get('apc', 'N/A'))
+                            apc_value = journal.get('apc', 'N/A')
+                            st.metric("APC", f"${apc_value}" if apc_value not in ['N/A', '-'] else f"{apc_value} Information not found")
                         with col2:
                             st.markdown(f"**Publisher:** {journal.get('publisher', 'N/A')}")
                             st.markdown(f"**Scopus Index:** {journal.get('indexScopus', 'N/A')}")

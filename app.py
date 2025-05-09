@@ -553,7 +553,7 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
                             st.metric("Cite Score", journal.get('citeScore', 'N/A'))
                             st.metric("Impact Factor", journal.get('impactFactor', 'N/A'))
                             apc_value = journal.get('apc', 'N/A')
-                            st.metric("APC", f"${apc_value}" if apc_value not in ['N/A', '-'] else f"{apc_value} Information not found")
+                            st.metric("APC", f"${apc_value}" if apc_value not in ['N/A', '-'] else f"{apc_value} not found")
                         with col2:
                             st.markdown(f"**Publisher:** {journal.get('publisher', 'N/A')}")
                             st.markdown(f"**Scopus Index:** {journal.get('indexScopus', 'N/A')}")

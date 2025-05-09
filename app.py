@@ -486,6 +486,10 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
                 
                 # Enhanced dataframe display
                 df_recommendations = pd.DataFrame(recommendations)
+
+                df_recommendations['apc'] = display_df['apc'].apply(
+                    lambda x: f"${x}" if str(x) not in ['-', 'N/A', 'nan', ''] and str(x).replace('.','',1).isdigit() else x
+                )
                 
                 # Column configuration
                 column_config = {
@@ -494,7 +498,7 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
                     "indexScopus": st.column_config.TextColumn("Scopus Index"),
                     "citeScore": st.column_config.NumberColumn("Cite Score", format="%.1f"),
                     "publisher": st.column_config.TextColumn("Publisher"),
-                    "apc": st.column_config.TextColumn("APC (USD)", help="Article Processing Charge", format="$%s"),
+                    "apc": st.column_config.TextColumn("APC (USD)"),
                     "impactFactor": st.column_config.TextColumn("Impact Factor"),
                     "score": st.column_config.ProgressColumn(
                         "Similarity Score",

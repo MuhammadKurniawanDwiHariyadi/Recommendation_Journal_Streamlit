@@ -408,15 +408,19 @@ if st.button("🔍 Find Recommendations", use_container_width=True):
                 # 1. Publisher filter
                 pub_match = not publisher_filter or publisher_filter.lower() in str(journal.get('publisher', '')).lower()
                 
-                # 2. APC filter
+                # 2. APC filter - fixed version
                 apc_match = True
                 if apc_min > 0 or apc_max < 15000:
                     apc_str = str(journal.get('apc', '0'))
-                    try:
-                        apc_val = float(''.join(c for c in apc_str if c.isdigit() or c == '.'))
-                        apc_match = apc_min <= apc_val <= apc_max
-                    except (ValueError, TypeError):
-                        apc_match = False
+                    if apc_str in ['-', 'N/A', '']:
+                        apc_match = apc_min == 0
+                    else:
+                        try:
+                            apc_cleaned = ''.join(c for c in apc_str if c.isdigit() or c == '.')
+                            apc_val = float(apc_cleaned) if apc_cleaned else 0
+                            apc_match = apc_min <= apc_val <= apc_max
+                        except (ValueError, TypeError):
+                            apc_match = False
                 
                 # 3. Quantile filter
                 quantile_match = True
